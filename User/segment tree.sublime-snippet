@@ -1,0 +1,74 @@
+<snippet>
+	<content><![CDATA[
+template<typename node, typename update>
+struct segtree {
+    int len; vector<node> S; vector<int> lazy;
+    vector<update> u; node IE; update IU;
+    segtree(int l) {
+        len = l; S.resize(4*len); lazy.resize(4*len);
+        u.resize(4*len); IE = node(); IU = update();
+    }
+    template<typename T>
+    void build(const T &arr, int v, int tl, int tr) {
+        if(tl == tr) { S[v] = arr[tl]; return; }
+        int tm = (tl + tr) / 2;
+        build(arr, 2*v, tl, tm); build(arr, 2*v+1, tm+1, tr);
+        S[v].merge(S[2*v], S[2*v+1]);
+    }
+    void apply(int v, int tl, int tr, update &upd) {
+        upd.apply(S[v], tl, tr);
+        if(tl != tr) lazy[v] = 1, u[v].combine(upd, tl, tr);
+    }
+    void pushdown(int v, int tl, int tr) {
+        if(!lazy[v]) return;
+        lazy[v] = 0; int tm = (tl + tr) / 2;
+        apply(2*v, tl, tm, u[v]); apply(2*v+1, tm+1, tr, u[v]);
+        u[v] = IU;
+    }
+    void rupd(int v, int tl, int tr, int l, int r, update &u) {
+        if(tl > r or tr < l) return;
+        if(l <= tl and tr <= r) { apply(v, tl, tr, u); return; }
+        int tm = (tl + tr) / 2; pushdown(v, tl, tr);
+        rupd(2*v, tl, tm, l, r, u); rupd(2*v+1, tm+1, tr, l, r, u);
+        S[v].merge(S[2*v], S[2*v+1]);
+    }
+    node query(int v, int tl, int tr, int l, int r) {
+        if(tl > r or tr < l) return IE;
+        if(l <= tl and tr <= r) return S[v]; 
+        int tm = (tl + tr) / 2; pushdown(v, tl, tr);
+        node a = query(2*v, tl, tm, l, r), b = query(2*v+1, tm+1, tr, l, r), ans;
+        ans.merge(a, b); return ans;
+    }
+    template<typename T>
+    void build(const T &arr) { build(arr, 1, 0, len-1); }
+    void rupd(int l, int r, update u) { rupd(1, 0, len-1, l, r, u); }
+    node query(int l, int r) { return query(1, 0, len-1, l, r); }
+
+};
+ 
+struct node {
+    int v = 0;
+    node() {}
+    node(int val) { v = val; }
+    void merge(node &l, node &r) {
+        v = l.v + r.v;
+    }
+};
+
+struct update {
+    int v = 0;
+    update() {}
+    update(int val) { v = val; }
+    void combine(update &other, int tl, int tr) {
+        v = other.v;
+    }
+    void apply(node &x, int tl, int tr) {
+        x.v = (tr - tl + 1) * v;
+    }
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>segmenttree</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

@@ -1,0 +1,48 @@
+<snippet>
+	<content><![CDATA[
+const int N = 1e3 + 100, mod = 998244353;
+
+int fact[N], inv[N];
+ 
+void fact_() {
+    fact[0] = 1;
+    for(int i = 1; i < N; i++) fact[i] = (fact[i-1] * i) % mod;
+}
+ 
+int _inv(int i) {
+    int res = 1;
+    int n = mod - 2;
+    while(n > 0) {
+        if(n & 1) {
+            res = res * i;
+            res %= mod;
+        }
+        i = i * i;
+        i %= mod;
+        n >>= 1;
+    }
+    return res%mod;
+} 
+ 
+void inv_mod(){
+    inv[1] = 1;
+    inv[0] = 1;
+    for(int i = 2 ; i < N ; i++){
+        inv[i] = inv[i-1] * _inv(i);
+        inv[i] %= mod;
+    }
+}
+
+int C(int n, int k) {
+    if(n <= 0) return 0;
+    if(k < 0 or k > n) return 0;
+    if(k == 0 or k == n) return 1;
+    return (((fact[n] * inv[k]) % mod ) * inv[n-k]) % mod;
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>binomial</tabTrigger> 
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>
